@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Scopes\isActiveScope;
 use Database\Seeders\CategorySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -36,7 +37,7 @@ class CategoryTest extends TestCase
         $result = Category::insert($categories);
         $this->assertTrue($result);
 
-        $total = Category::count();
+        $total = Category::withoutGlobalScopes([isActiveScope::class])->count();
         $this->assertEquals(10, $total);
     }
 
@@ -44,7 +45,7 @@ class CategoryTest extends TestCase
     {
         $this->seed(CategorySeeder::class);
 
-        $category = Category::find('FOOD');
+        $category = Category::withoutGlobalScopes([isActiveScope::class])->find('FOOD');
 
         $this->assertNotNull($category);
         $this->assertEquals($category->id, 'FOOD');
@@ -56,7 +57,7 @@ class CategoryTest extends TestCase
     {
         $this->seed(CategorySeeder::class);
 
-        $category = Category::find('FOOD');
+        $category = Category::withoutGlobalScopes([isActiveScope::class])->find('FOOD');
         $category->name = 'food updated';
 
         $result = $category->update();
@@ -78,7 +79,7 @@ class CategoryTest extends TestCase
 
         Category::insert($categories);
 
-        $result = Category::whereNull('description')->get();
+        $result = Category::withoutGlobalScopes([isActiveScope::class])->whereNull('description')->get();
         $this->assertEquals(10, $result->count());
         $result->each(function ($category) {
             $this->assertNull($category->description);
@@ -103,10 +104,10 @@ class CategoryTest extends TestCase
 
         Category::insert($categories);
 
-        Category::whereNull('description')->update([
+        Category::withoutGlobalScopes([isActiveScope::class])->whereNull('description')->update([
             'description' => 'updated'
         ]);
-        $total = Category::where('description', '=', 'updated')->count();
+        $total = Category::withoutGlobalScopes([isActiveScope::class])->where('description', '=', 'updated')->count();
         $this->assertEquals(10, $total);
     }
 
@@ -114,12 +115,12 @@ class CategoryTest extends TestCase
     {
         $this->seed(CategorySeeder::class);
 
-        $category = Category::find('FOOD');
+        $category = Category::withoutGlobalScopes([isActiveScope::class])->find('FOOD');
         $result = $category->delete();
 
         $this->assertTrue($result);
 
-        $total = Category::count();
+        $total = Category::withoutGlobalScopes([isActiveScope::class])->count();
         $this->assertEquals(0, $total);
     }
 
@@ -137,11 +138,11 @@ class CategoryTest extends TestCase
         }
 
         Category::insert($categories);
-        $total = Category::count();
+        $total = Category::withoutGlobalScopes([isActiveScope::class])->count();
         $this->assertEquals(10, $total);
 
-        Category::whereNull('description')->delete();
-        $total = Category::count();
+        Category::withoutGlobalScopes([isActiveScope::class])->whereNull('description')->delete();
+        $total = Category::withoutGlobalScopes([isActiveScope::class])->count();
         $this->assertEquals(0, $total);
     }
 
@@ -168,10 +169,26 @@ class CategoryTest extends TestCase
             'description' => 'food category updated'
         ];
 
-        $category = Category::find('food');
+        $category = Category::withoutGlobalScopes([isActiveScope::class])->find('food');
         $category->fill($request);
         $category->update();
 
         $this->assertNotNull($category->name);
+    }
+
+    public function testGlobalScope()
+    {
+        Category::create([
+            'id' => 'FOOD',
+            'name' => 'Food',
+            'description' => 'food category',
+            'is_active' => false,
+        ]);
+
+        $category = Category::find('FOOD');
+        $this->assertNull($category);
+
+        $category = Category::withoutGlobalScopes([isActiveScope::class])->find('FOOD');
+        $this->assertNotNull($category);
     }
 }
