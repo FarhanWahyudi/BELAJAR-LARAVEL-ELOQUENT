@@ -3,8 +3,10 @@
 namespace Tests\Feature;
 
 use App\Models\Voucher;
+use Database\Seeders\VoucherSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Log;
 use Tests\TestCase;
 
 class VoucherTest extends TestCase
@@ -26,5 +28,19 @@ class VoucherTest extends TestCase
         $voucher->save();
 
         $this->assertNotNull($voucher->voucher_code);
+    }
+
+    public function testSoftDelete()
+    {
+        $this->seed(VoucherSeeder::class);
+
+        $voucher = Voucher::where('name', '=', 'sample voucher')->first();
+        $voucher->delete();
+
+        $voucher = Voucher::where('name', '=', 'sample voucher')->first();
+        $this->assertNull($voucher);
+
+        $voucher = Voucher::withTrashed()->where('name', '=', 'sample voucher')->first();
+        $this->assertNotNull($voucher);
     }
 }
