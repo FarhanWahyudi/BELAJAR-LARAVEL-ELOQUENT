@@ -144,4 +144,34 @@ class CategoryTest extends TestCase
         $total = Category::count();
         $this->assertEquals(0, $total);
     }
+
+    public function testCreate()
+    {
+        $request = [
+            'id' => 'FOOD',
+            'name' => 'food',
+            'description' => 'food category'
+        ];
+
+        $category = new Category($request);
+        $category->save();
+
+        $this->assertNotNull($category);
+    }
+
+    public function testUpdateMass()
+    {
+        $this->seed(CategorySeeder::class);
+
+        $request = [
+            'name' => 'food updated',
+            'description' => 'food category updated'
+        ];
+
+        $category = Category::find('food');
+        $category->fill($request);
+        $category->update();
+
+        $this->assertNotNull($category->name);
+    }
 }
