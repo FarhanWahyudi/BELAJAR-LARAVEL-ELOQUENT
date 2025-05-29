@@ -26,11 +26,11 @@ class CategoryTest extends TestCase
 
         for ($i = 1; $i <= 10; $i++) {
             for ($i = 1; $i <= 10; $i++) {
-            $categories[] = [
-                'id' => "ID: $i",
-                'name' => "NAME: $i"
-            ];
-        }
+                $categories[] = [
+                    'id' => "ID: $i",
+                    'name' => "NAME: $i"
+                ];
+            }
         }
 
         $result = Category::insert($categories);
@@ -61,5 +61,30 @@ class CategoryTest extends TestCase
 
         $result = $category->update();
         $this->assertTrue($result);
+    }
+
+    public function testSelect()
+    {
+        $categories = [];
+
+        for ($i = 1; $i <= 10; $i++) {
+            for ($i = 1; $i <= 10; $i++) {
+                $categories[] = [
+                    'id' => "ID: $i",
+                    'name' => "NAME: $i"
+                ];
+            }
+        }
+
+        Category::insert($categories);
+
+        $result = Category::whereNull('description')->get();
+        $this->assertEquals(10, $result->count());
+        $result->each(function ($category) {
+            $this->assertNull($category->description);
+
+            $category->description = 'updated';
+            $category->update();
+        });
     }
 }
