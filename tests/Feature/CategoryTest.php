@@ -18,4 +18,24 @@ class CategoryTest extends TestCase
 
         $this->assertTrue($result);
     }
+
+    public function testInsertMany()
+    {
+        $categories = [];
+
+        for ($i = 1; $i <= 10; $i++) {
+            for ($i = 1; $i <= 10; $i++) {
+            $categories[] = [
+                'id' => "ID: $i",
+                'name' => "NAME: $i"
+            ];
+        }
+        }
+
+        $result = Category::insert($categories);
+        $this->assertTrue($result);
+
+        $total = Category::count();
+        $this->assertEquals(10, $total);
+    }
 }
