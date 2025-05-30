@@ -4,12 +4,16 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\Review;
 use App\Models\Scopes\isActiveScope;
 use Database\Seeders\CategorySeeder;
+use Database\Seeders\CustomerSeeder;
 use Database\Seeders\ProductSeeder;
+use Database\Seeders\ReviewSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Log;
+use PDO;
 use Tests\TestCase;
 
 class CategoryTest extends TestCase
@@ -251,5 +255,15 @@ class CategoryTest extends TestCase
 
         $mostExpensiveProduct = $category->mostExpensiveProduct;
         $this->assertEquals('1', $mostExpensiveProduct->id);
+    }
+
+    public function testHasManyThrough()
+    {
+        $this->seed([CustomerSeeder::class ,CategorySeeder::class, ProductSeeder::class, ReviewSeeder::class]);
+
+        $category = Category::find('FOOD');
+        $reviews = $category->review;
+
+        $this->assertEquals(2, $reviews->count());
     }
 }
