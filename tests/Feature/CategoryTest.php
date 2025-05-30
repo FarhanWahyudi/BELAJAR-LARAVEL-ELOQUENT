@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Category;
+use App\Models\Product;
 use App\Models\Scopes\isActiveScope;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\ProductSeeder;
@@ -204,5 +205,38 @@ class CategoryTest extends TestCase
         $product = $category->products;
         $this->assertNotNull($product);
         $this->assertEquals(1, $product->count());
+    }
+
+    public function testOneToManyQuery()
+    {
+        $this->seed(CategorySeeder::class);
+
+        $category = Category::find('FOOD');
+
+        $product = new Product();
+        $product->id = '1';
+        $product->name = 'product 1';
+        $product->description = 'desc 1';
+
+        $category->products()->save($product);
+
+        $this->assertEquals($category->id, $product->category_id);
+        $this->assertEquals($category->id, $product->category_id);
+    }
+
+    public function testRelationshipQuery()
+    {
+        $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+        $product = new Product();
+        $product->id = '2';
+        $product->name = 'product 1';
+        $product->description = 'product desc';
+        $product->category_id = 'FOOD';
+        $product->save();
+
+        $category = Category::find('FOOD');
+        $outOfStockProducts = $category->products()->where('stock', '<=', 0)->get();
+        $this->assertCount(2, $outOfStockProducts);
     }
 }
