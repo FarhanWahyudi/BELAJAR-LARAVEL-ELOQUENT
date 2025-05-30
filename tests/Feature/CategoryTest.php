@@ -204,7 +204,7 @@ class CategoryTest extends TestCase
 
         $product = $category->products;
         $this->assertNotNull($product);
-        $this->assertEquals(1, $product->count());
+        $this->assertEquals(2, $product->count());
     }
 
     public function testOneToManyQuery()
@@ -229,7 +229,7 @@ class CategoryTest extends TestCase
         $this->seed([CategorySeeder::class, ProductSeeder::class]);
 
         $product = new Product();
-        $product->id = '2';
+        $product->id = '3';
         $product->name = 'product 1';
         $product->description = 'product desc';
         $product->category_id = 'FOOD';
@@ -237,6 +237,19 @@ class CategoryTest extends TestCase
 
         $category = Category::find('FOOD');
         $outOfStockProducts = $category->products()->where('stock', '<=', 0)->get();
-        $this->assertCount(2, $outOfStockProducts);
+        $this->assertCount(3, $outOfStockProducts);
+    }
+
+    public function testHasOneOfMany()
+    {
+        $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+        $category = Category::find('FOOD');
+
+        $cheapestProduct = $category->cheapestProduct;
+        $this->assertEquals('2', $cheapestProduct->id);
+
+        $mostExpensiveProduct = $category->mostExpensiveProduct;
+        $this->assertEquals('1', $mostExpensiveProduct->id);
     }
 }
