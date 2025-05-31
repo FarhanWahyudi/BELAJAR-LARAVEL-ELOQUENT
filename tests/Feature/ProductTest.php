@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Category;
 use App\Models\Product;
 use Database\Seeders\CategorySeeder;
 use Database\Seeders\ProductSeeder;
@@ -23,5 +24,16 @@ class ProductTest extends TestCase
         $this->assertNotNull($category);
         $this->assertEquals(1, $category->count());
         Log::info($category);
+    }
+
+    public function testElloquentCollection()
+    {
+        $this->seed([CategorySeeder::class, ProductSeeder::class]);
+
+        $product = Product::get();
+
+        $product = $product->toQuery()->where('price', 400)->get();
+
+        $this->assertEquals(1, $product[0]->id);
     }
 }
